@@ -8,7 +8,12 @@ namespace Lexico_1
     public class Program
     {
         static void Main(string[] args) {
-            Console.WriteLine("Proyecto Léxico 01 creado");
+            using Lexico token = new();
+
+            token.setContent("Hola");
+            token.setClasification(Token.Tipos.Indentificador);
+
+            Console.WriteLine(token.getContent() + " " + token.getClasification());
         }
     }
 }
