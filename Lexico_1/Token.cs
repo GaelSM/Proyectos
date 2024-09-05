@@ -10,14 +10,29 @@ namespace Lexico_1
     {
         public enum Tipos
         {
-            Indentificador, Numero, Caracter
+            Indentificador, 
+            Numero, 
+            Caracter, 
+            FinSentencia,
+            InicioBloque,
+            FinBloque,
+            OperadorTermino,
+            OperadorTernario,
+            OperadorFactor,
+            IncrementoTermino,
+            IncrementoFactor,
+            Flecha,
+            Asignacion,
+            Relacional,
+            Logico,
+            Moneda
         }
         private string content;
         private Tipos clasification;
         public Token()
         {
             this.content = "";
-            this.clasification = Tipos.Indentificador;
+            this.clasification = Tipos.Caracter;
         }
 
         public void setContent(string content) {

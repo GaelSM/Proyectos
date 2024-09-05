@@ -5,15 +5,20 @@ using System.Threading.Tasks;
 
 namespace Lexico_1
 {
-    public class Program
+    public class Program : Token
     {
-        static void Main(string[] args) {
-            using Lexico token = new();
-
-            token.setContent("Hola");
-            token.setClasification(Token.Tipos.Indentificador);
-
-            Console.WriteLine(token.getContent() + " " + token.getClasification());
+        static void Main(string[] args)
+        {
+            try
+            {
+                using Lexico token = new();
+                token.GetAllTokens();
+                //Console.WriteLine(token.LineCounter());
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
+            }
         }
     }
 }
