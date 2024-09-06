@@ -8,52 +8,65 @@ namespace Lexico_1
 {
     public class Lexico : Token, IDisposable
     {
+        int lines;
         readonly StreamReader file;
         readonly StreamWriter logger;
         readonly StreamWriter assembly;
         public Lexico()
         {
-            logger = new StreamWriter("./test.log");
-            assembly = new StreamWriter("./test.asm");
+            logger = new StreamWriter("./main.log");
+            assembly = new StreamWriter("./main.asm");
 
             logger.AutoFlush = true;
             assembly.AutoFlush = true;
 
-            if (File.Exists("./test.cpp"))
+            if (File.Exists("./main.cpp"))
             {
-                file = new StreamReader("./test.cpp");
+                this.lines = 1;
+                file = new StreamReader("./main.cpp");
             }
             else
             {
-                throw new ErrorHandling("File test.cpp doesn´t exists", logger);
+                throw new ErrorHandling("File main.cpp doesn´t exists", logger);
             }
         }
 
-        public Lexico(string fileName)
+        public Lexico(string file)
         {
-            logger = new StreamWriter("./" + fileName + ".log");
-            assembly = new StreamWriter("./" + fileName + ".asm");
+            string fileName = Path.GetFileNameWithoutExtension(file);
 
-            logger.AutoFlush = true;
-            assembly.AutoFlush = true;
+            if (!(Path.GetExtension(file) == ".cpp"))
+            {
+                throw new ErrorHandling("File doesn´t have correct extension .cpp");
+            }
+
+            logger = new StreamWriter("./" + fileName + ".log")
+            {
+                AutoFlush = true
+            };
+
+            if (!File.Exists(file))
+            {
+                throw new ErrorHandling("File " + file + " doesn´t exist", logger);
+            }
+
+            assembly = new StreamWriter("./" + fileName + ".asm")
+            {
+                AutoFlush = true
+            };
+
+            this.lines = 1;
+            this.file = new StreamReader("./" + file);
         }
 
         public void Dispose()
         {
+            logger.WriteLine("Number of lines: " + this.lines);
+            logger.WriteLine("Destructor executed");
+
             file.Close();
             logger.Close();
             assembly.Close();
-        }
-
-        public int LineCounter()
-        {
-            int counter = 0;
-            while (!file.EndOfStream)
-            {
-                file.ReadLine();
-                counter++;
-            }
-            return counter;
         }
 
         public void NextToken()
@@ -65,6 +78,12 @@ namespace Lexico_1
             while (true)
             {
                 currentSymbol = (char)file.Peek();
+
+                if (currentSymbol == 10)
+                {
+                    this.lines++;
+                }
+
                 if (char.IsWhiteSpace(currentSymbol))
                 {
                     file.Read();
@@ -225,6 +244,11 @@ namespace Lexico_1
                     word += currentSymbol;
                     file.Read();
                 }
+                else if (word[0] == '<' && currentSymbol == '>')
+                {
+                    word += currentSymbol;
+                    file.Read();
+                }
 
                 setClasification(Tipos.Relacional);
             }
@@ -256,25 +280,29 @@ namespace Lexico_1
                 if (char.IsDigit(currentSymbol))
                 {
                     setClasification(Tipos.Moneda);
-                    
+
                     word += currentSymbol;
                     file.Read();
 
                     while (true)
                     {
-                        currentSymbol = (char) file.Peek();
+                        currentSymbol = (char)file.Peek();
 
-                        if(char.IsDigit(currentSymbol)) {
+                        if (char.IsDigit(currentSymbol))
+                        {
                             word += currentSymbol;
                             file.Read();
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
                     }
                 }
             }
 
-            else {
+            else
+            {
                 setClasification(Tipos.Caracter);
             }
 

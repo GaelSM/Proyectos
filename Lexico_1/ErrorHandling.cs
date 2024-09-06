@@ -8,6 +8,9 @@ namespace Lexico_1
 {
     public class ErrorHandling : Exception
     {
+        public ErrorHandling(string message) : base(message) {
+            
+        }
         public ErrorHandling(string message, StreamWriter logger) : base(message) {
             logger.WriteLine("Error: " + message);
         }

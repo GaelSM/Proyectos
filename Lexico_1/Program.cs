@@ -11,9 +11,8 @@ namespace Lexico_1
         {
             try
             {
-                using Lexico token = new();
+                using Lexico token = new("main.cpp");
                 token.GetAllTokens();
-                //Console.WriteLine(token.LineCounter());
             }
             catch (Exception error)
             {
