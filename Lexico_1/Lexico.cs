@@ -22,7 +22,7 @@ namespace Lexico_1
 
             if (File.Exists("./main.cpp"))
             {
-                this.lines = 1;
+                lines = 1;
                 file = new StreamReader("./main.cpp");
             }
             else
@@ -33,12 +33,12 @@ namespace Lexico_1
 
         public Lexico(string file)
         {
-            string fileName = Path.GetFileNameWithoutExtension(file);
-
             if (!(Path.GetExtension(file) == ".cpp"))
             {
                 throw new ErrorHandling("File doesn´t have correct extension .cpp");
             }
+
+            string fileName = Path.GetFileNameWithoutExtension(file);
 
             logger = new StreamWriter("./" + fileName + ".log")
             {
@@ -55,15 +55,12 @@ namespace Lexico_1
                 AutoFlush = true
             };
 
-            this.lines = 1;
+            lines = 1;
             this.file = new StreamReader("./" + file);
         }
 
         public void Dispose()
         {
-            logger.WriteLine("Number of lines: " + this.lines);
-            logger.WriteLine("Destructor executed");
-
             file.Close();
             logger.Close();
             assembly.Close();
@@ -75,23 +72,14 @@ namespace Lexico_1
             string word = "";
 
             //Leer espacios
-            while (true)
+            while (char.IsWhiteSpace(currentSymbol = (char) file.Peek()))
             {
-                currentSymbol = (char)file.Peek();
-
                 if (currentSymbol == 10)
                 {
-                    this.lines++;
+                    lines++;
                 }
 
-                if (char.IsWhiteSpace(currentSymbol))
-                {
-                    file.Read();
-                }
-                else
-                {
-                    break;
-                }
+                file.Read();
             }
 
             word += currentSymbol;
@@ -101,18 +89,10 @@ namespace Lexico_1
             if (char.IsLetter(currentSymbol))
             {
                 setClasification(Tipos.Indentificador);
-                while (true)
+                while (char.IsLetterOrDigit(currentSymbol = (char) file.Peek()))
                 {
-                    currentSymbol = (char)file.Peek();
-                    if (char.IsLetterOrDigit(currentSymbol))
-                    {
-                        word += currentSymbol;
-                        file.Read();
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    word += currentSymbol;
+                    file.Read();
                 }
             }
 
@@ -120,22 +100,59 @@ namespace Lexico_1
             else if (char.IsDigit(currentSymbol))
             {
                 setClasification(Tipos.Numero);
-                while (true)
+
+                while (char.IsDigit(currentSymbol = (char) file.Peek()))
                 {
-                    currentSymbol = (char)file.Peek();
-                    if (char.IsDigit(currentSymbol))
+                    word += currentSymbol;
+                    file.Read();
+                }
+
+                //Parte fraccionaria
+                if (currentSymbol == '.')
+                {
+                    word += currentSymbol;
+                    file.Read();
+
+                    currentSymbol = (char) file.Peek();
+
+                    if (!char.IsDigit(currentSymbol))
+                    {
+                        throw new ErrorHandling("Invalid number", logger, lines);
+                    }
+
+                    while (char.IsDigit(currentSymbol = (char) file.Peek()))
                     {
                         word += currentSymbol;
                         file.Read();
                     }
-                    else
+                }
+
+                //Parte científica
+                if (char.ToLower(currentSymbol = (char) file.Peek()) == 'e')
+                {
+                    word += currentSymbol;
+                    file.Read();
+
+                    currentSymbol = (char) file.Peek();
+
+                    if(currentSymbol == '+' || currentSymbol == '-') {
+                        word += currentSymbol;
+                        file.Read();
+                    }
+
+                    if(!char.IsDigit((char) file.Peek())) {
+                        throw new ErrorHandling("Invalid number", logger, lines);
+                    }
+
+                    while (char.IsDigit(currentSymbol = (char)file.Peek()))
                     {
-                        break;
+                        word += currentSymbol;
+                        file.Read();
                     }
                 }
             }
 
-            //Fin de sentencia
+            // Fin de sentencia
             else if (currentSymbol == ';')
             {
                 setClasification(Tipos.FinSentencia);
@@ -147,13 +164,13 @@ namespace Lexico_1
                 setClasification(Tipos.InicioBloque);
             }
 
-            //Fin de Bloque
+            // Fin de Bloque
             else if (currentSymbol == '}')
             {
                 setClasification(Tipos.FinBloque);
             }
 
-            //Operador de termino
+            // Operador de termino
             else if (currentSymbol == '+' || currentSymbol == '-')
             {
                 currentSymbol = (char)file.Peek();
@@ -178,13 +195,13 @@ namespace Lexico_1
                 }
             }
 
-            //Operador ternario
+            // Operador ternario
             else if (currentSymbol == '?')
             {
                 setClasification(Tipos.OperadorTernario);
             }
 
-            //Operador de asignación (=)
+            // Operador de asignación (=)
             else if (currentSymbol == '=')
             {
                 currentSymbol = (char)file.Peek();
@@ -192,7 +209,7 @@ namespace Lexico_1
                 //Operador relacional (==)
                 if (currentSymbol == word[0])
                 {
-                    setClasification(Tipos.Relacional);
+                    setClasification(Tipos.OperadorRelacional);
                     word += currentSymbol;
                     file.Read();
                 }
@@ -202,7 +219,7 @@ namespace Lexico_1
                 }
             }
 
-            //Operador lógico (!)
+            // Operador lógico (!)
             else if (currentSymbol == '!')
             {
                 currentSymbol = (char)file.Peek();
@@ -210,30 +227,32 @@ namespace Lexico_1
                 //Operador relacional (!=)
                 if (currentSymbol == '=')
                 {
-                    setClasification(Tipos.Relacional);
+                    setClasification(Tipos.OperadorRelacional);
                     word += currentSymbol;
                     file.Read();
                 }
                 else
                 {
-                    setClasification(Tipos.Logico);
+                    setClasification(Tipos.OperadorLogico);
                 }
             }
 
-            //Operador lógico (&&) o (||)
+            // Operador lógico (&&) o (||)
             else if (currentSymbol == '&' || currentSymbol == '|')
             {
+                setClasification(Tipos.Caracter);
+
                 currentSymbol = (char)file.Peek();
 
                 if (currentSymbol == word[0])
                 {
                     word += currentSymbol;
-                    setClasification(Tipos.Logico);
+                    setClasification(Tipos.OperadorLogico);
                     file.Read();
                 }
             }
 
-            //Operador relacional (>) o (<)
+            // Operador relacional (>) o (<)
             else if (currentSymbol == '>' || currentSymbol == '<')
             {
                 currentSymbol = (char)file.Peek();
@@ -250,10 +269,10 @@ namespace Lexico_1
                     file.Read();
                 }
 
-                setClasification(Tipos.Relacional);
+                setClasification(Tipos.OperadorRelacional);
             }
 
-            //Operador de factor (/) (*) (%)
+            // Operador de factor (/) (*) (%)
             else if (currentSymbol == '/' || currentSymbol == '*' || currentSymbol == '%')
             {
                 currentSymbol = (char)file.Peek();
@@ -271,6 +290,7 @@ namespace Lexico_1
                 }
             }
 
+            // Moneda
             else if (currentSymbol == '$')
             {
                 setClasification(Tipos.Caracter);
@@ -301,13 +321,70 @@ namespace Lexico_1
                 }
             }
 
+            // Cadena
+            else if (currentSymbol == '"')
+            {
+                setClasification(Tipos.Cadena);
+
+                if ((currentSymbol = (char)file.Peek()) == '"')
+                {
+                    word += currentSymbol;
+                    file.Read();
+                }
+                else
+                {
+
+                    while (!((currentSymbol = (char)file.Peek()) == '"'))
+                    {
+                        if (file.EndOfStream)
+                        {
+                            throw new ErrorHandling("String not closed", logger, lines);
+                        }
+
+                        word += currentSymbol;
+                        file.Read();
+                    }
+
+                    word += currentSymbol;
+                    file.Read();
+                }
+            }
+
+            // Caracter
+            else if (currentSymbol == '\'')
+            {
+                setClasification(Tipos.Caracter);
+
+                currentSymbol = (char) file.Read();
+                word += currentSymbol;
+
+                currentSymbol = (char) file.Peek();
+
+                if(currentSymbol != '\'') {
+                    throw new ErrorHandling("Invalid caracter", logger, lines);
+                }
+
+                word += currentSymbol;
+                file.Read();
+            }
+
+            // Caracter
+            else if(currentSymbol == '#') {
+                setClasification(Tipos.Caracter);
+
+                while(char.IsDigit(currentSymbol = (char) file.Peek())) {
+                    word += currentSymbol;
+                    file.Read();
+                }
+            }
+
             else
             {
                 setClasification(Tipos.Caracter);
             }
 
             setContent(word);
-            logger.WriteLine(word + " -> " + getClasification());
+            logger.WriteLine(word + " ---- " + getClasification());
         }
 
         public void GetAllTokens()

@@ -1,7 +1,12 @@
-for(int i = 0; i <> 10 && i >= 1 || i < 5 && !i; i++) {
-
-}
-__ARRAY_OPERATORSa
-alignasa
-aaaa
-alignasa
+230
+230.30
+230e30
+230e-30
+230e+30
+230.30e30
+230.30e-30
+230.30e+30
+"hola mundo"
+#
+#64
+'@'

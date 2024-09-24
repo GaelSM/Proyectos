@@ -11,7 +11,7 @@ namespace Lexico_1
         {
             try
             {
-                using Lexico token = new("main.cpp");
+                using Lexico token = new ("main.cpp");
                 token.GetAllTokens();
             }
             catch (Exception error)

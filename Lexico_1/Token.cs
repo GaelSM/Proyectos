@@ -23,9 +23,10 @@ namespace Lexico_1
             IncrementoFactor,
             Flecha,
             Asignacion,
-            Relacional,
-            Logico,
-            Moneda
+            OperadorRelacional,
+            OperadorLogico,
+            Moneda,
+            Cadena
         }
         private string content;
         private Tipos clasification;

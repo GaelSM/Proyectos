@@ -1,37 +1,13 @@
-for -> Indentificador
-( -> Caracter
-int -> Indentificador
-i -> Indentificador
-= -> Asignacion
-0 -> Numero
-; -> FinSentencia
-i -> Indentificador
-<> -> Relacional
-10 -> Numero
-&& -> Logico
-i -> Indentificador
->= -> Relacional
-1 -> Numero
-|| -> Logico
-i -> Indentificador
-< -> Relacional
-5 -> Numero
-&& -> Logico
-! -> Logico
-i -> Indentificador
-; -> FinSentencia
-i -> Indentificador
-++ -> IncrementoTermino
-) -> Caracter
-{ -> InicioBloque
-} -> FinBloque
-_ -> Caracter
-_ -> Caracter
-ARRAY -> Indentificador
-_ -> Caracter
-OPERATORSa -> Indentificador
-alignasa -> Indentificador
-aaaa -> Indentificador
-alignasa -> Indentificador
-Number of lines: 7
-Destructor executed
+230 ---- Numero
+230.30 ---- Numero
+230e30 ---- Numero
+230e-30 ---- Numero
+230e+30 ---- Numero
+230.30e30 ---- Numero
+230.30e-30 ---- Numero
+230.30e+30 ---- Numero
+"hola mundo" ---- Cadena
+# ---- Caracter
+#64 ---- Caracter
+'@' ---- Caracter
+' ' ---- Caracter
